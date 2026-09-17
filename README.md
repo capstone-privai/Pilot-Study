@@ -41,7 +41,12 @@ python src/analysis_extra.py --human rating/rater_a.json rating/rater_b.json rat
 ### gen 메모 (Groq 무료 티어)
 
 - 한도: 30 RPM / 8K TPM / 1K RPD / **200K TPD**. 240건 전체가 약 210K 토큰이라 하루에 못 끝날 수 있다.
-  한도에 걸려 중단되면 다음날 같은 명령을 다시 실행하면 캐시(`runs/cache.jsonl`)된 건은 건너뛰고 이어간다.
+  일일 한도에 걸리면 스크립트가 리셋 시각까지 자동으로 기다렸다가 이어간다. 그냥 틀어놓으면 된다.
+  ```bash
+  nohup python src/pilot.py gen --backend groq > runs/gen.log 2>&1 &
+  tail -f runs/gen.log
+  ```
+  중간에 죽어도 다시 실행하면 캐시(`runs/cache.jsonl`)된 건은 건너뛰고 이어간다.
 - 호출 간 대기는 직전 호출의 토큰 사용량에 맞춰 자동으로 늘어난다 (`--sleep`은 최소값).
 - 일부만 돌리려면 `--in`/`--out`으로 별도 파일을 지정한다.
   ```bash

@@ -282,12 +282,28 @@ def backend_echo(prompt: str, model: str) -> tuple[str, int]:
     return ", ".join(dict.fromkeys(places)) or "정보 없음", 0
 
 
+def _retry_after(e: Exception) -> float:
+    """429 응답에서 재시도까지 남은 초. 헤더가 없으면 본문의 'try again in 3h47m12s'를 읽는다."""
+    try:
+        ra = e.response.headers.get("retry-after")          # openai.APIStatusError
+        if ra:
+            return float(ra)
+    except Exception:
+        pass
+    m = re.search(r"try again in\s*(?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?", str(e))
+    if m and any(m.groups()):
+        h, mi, se = (float(x or 0) for x in m.groups())
+        return h * 3600 + mi * 60 + se
+    return 0.0
+
+
 def backend_groq(api_key: str, base_url: str) -> Backend:
-    from openai import OpenAI                      # pip install openai
+    from openai import OpenAI, RateLimitError      # pip install openai
     cli = OpenAI(api_key=api_key, base_url=base_url)
 
     def call(prompt: str, model: str) -> tuple[str, int]:
-        for attempt in range(6):
+        attempt = 0
+        while attempt < 6:
             try:
                 # max_tokens는 실제 사용분만 TPM에 잡히므로(예약 아님) 넉넉히 둔다.
                 # T3 회신이 low에서도 ~800까지 나와 800이면 절반 이상 잘렸다.
@@ -296,10 +312,25 @@ def backend_groq(api_key: str, base_url: str) -> Backend:
                     max_tokens=2000, reasoning_effort="low")
                 return (r.choices[0].message.content or "",
                         r.usage.total_tokens if r.usage else 0)
+            except RateLimitError as e:
+                ra = _retry_after(e)
+                if ra > 120:
+                    # 분 단위(TPM/RPM)가 아니라 일일 한도(TPD/RPD). 리셋까지 자고 재시도.
+                    # 시도 횟수를 소모하지 않으므로 그냥 틀어놓으면 다음날 이어서 돈다.
+                    print(f"  일일 한도 도달. {ra / 3600:.1f}시간 대기 후 재개 "
+                          f"({time.strftime('%m-%d %H:%M', time.localtime(time.time() + ra))})",
+                          flush=True)
+                    time.sleep(ra + 30)
+                    continue
+                wait = max(min(60, 2 ** attempt * 5), ra)
+                print(f"  429, {wait:.0f}s 대기", flush=True)
+                time.sleep(wait)
+                attempt += 1
             except Exception as e:
                 wait = min(60, 2 ** attempt * 5)
-                print(f"  429/err, {wait}s 대기 ({e.__class__.__name__})")
+                print(f"  err, {wait}s 대기 ({e.__class__.__name__}: {str(e)[:80]})", flush=True)
                 time.sleep(wait)
+                attempt += 1
         raise RuntimeError("생성 실패")
     return call
 
@@ -325,7 +356,7 @@ def gen(in_path: str, out_path: str, call: Backend, model: str,
             r["raw"] = v
             fo.write(json.dumps(r, ensure_ascii=False) + "\n")
             if i % 20 == 0:
-                print(f"  {i}/{len(rows)}")
+                print(f"  {i}/{len(rows)}", flush=True)
     print(f"gen: {len(rows)} -> {out_path}")
 
 
