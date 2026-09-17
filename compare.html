@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T3 블라인드 짝비교</title>
+<style>
+  :root { --fg:#1f2328; --muted:#5b636b; --line:#d6dadf; --bg:#ffffff; --panel:#f7f8fa; --accent:#2f5fb3; --sel:#e6eefb; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:var(--bg); border-bottom:1px solid var(--line); padding:12px 20px; }
+  .criteria { margin:0; padding:10px 14px; background:var(--panel); border-left:4px solid var(--accent); font-size:16px; }
+  main { max-width:1280px; margin:0 auto; padding:16px 20px 60px; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  label { font-weight:600; }
+  input[type=text] { font-size:16px; padding:7px 10px; border:1px solid var(--line); border-radius:6px; }
+  button { font-size:16px; padding:8px 16px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:default; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .muted { color:var(--muted); }
+  .progress { flex:1; min-width:200px; height:8px; background:var(--panel); border-radius:4px; overflow:hidden; border:1px solid var(--line); }
+  .progress > div { height:100%; background:var(--accent); width:0; }
+  .request { margin:16px 0; padding:12px 16px; border:1px solid var(--line); border-radius:8px; }
+  .request .q { font-size:17px; font-weight:600; margin:4px 0 0; }
+  details summary { cursor:pointer; color:var(--muted); margin-top:8px; }
+  details pre { white-space:pre-wrap; font:15px/1.6 inherit; font-family:inherit; background:var(--panel); padding:12px; border-radius:6px; max-height:360px; overflow:auto; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width: 800px) { .pair { grid-template-columns:1fr; } }
+  .resp { border:1px solid var(--line); border-radius:8px; display:flex; flex-direction:column; min-width:0; }
+  .resp h3 { margin:0; padding:8px 14px; font-size:16px; border-bottom:1px solid var(--line); background:var(--panel); }
+  .resp pre { margin:0; padding:14px; white-space:pre-wrap; word-break:break-word; font-family:inherit; font-size:16px; line-height:1.7; min-height:200px; }
+  .choices { display:flex; gap:10px; justify-content:center; margin:18px 0 10px; flex-wrap:wrap; }
+  .choices button { min-width:170px; padding:12px 18px; }
+  .choices button.on { background:var(--sel); border-color:var(--accent); font-weight:700; }
+  .note { display:flex; gap:8px; justify-content:center; align-items:center; }
+  .note input { width:min(640px, 90%); }
+  .nav { display:flex; justify-content:space-between; margin-top:16px; gap:8px; flex-wrap:wrap; }
+  .msg { margin:10px 0; padding:10px 14px; border-radius:6px; background:#fff6e0; border:1px solid #f0d58a; }
+  .hidden { display:none !important; }
+  kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <p class="criteria"><b>평가 기준</b> — 어느 응답이 요청을 더 잘 수행했는가? 사실 정확성 → 지시 이행 → 구체성 순으로 보고, 문체 취향이나 길이만으로 판단하지 말 것.</p>
+</header>
+<main>
+  <!-- 1. 시작 화면 -->
+  <section id="setup">
+    <div class="row" style="margin:12px 0">
+      <label for="evaluator">평가자 ID</label>
+      <input id="evaluator" type="text" placeholder="예: jungwoo" autocomplete="off">
+      <label for="file">결과 파일</label>
+      <input id="file" type="file" accept=".jsonl,.json,.txt">
+      <button id="start" class="primary" disabled>평가 시작</button>
+    </div>
+    <p class="muted">restored.jsonl 또는 scored.jsonl을 선택하세요. 파일은 이 브라우저 안에서만 읽히며 어디에도 전송되지 않습니다.
+      같은 평가자 ID와 같은 파일이면 좌우 배치·순서가 동일하게 재현되고, 중간 저장된 진행 상황을 이어서 할 수 있습니다.</p>
+    <div id="loadmsg" class="msg hidden"></div>
+  </section>
+
+  <!-- 2. 평가 화면 -->
+  <section id="eval" class="hidden">
+    <div class="row">
+      <span id="who" class="muted"></span>
+      <div class="progress"><div id="bar"></div></div>
+      <span id="count"></span>
+      <button id="export">결과 내보내기 (JSON)</button>
+    </div>
+
+    <div class="request">
+      <div class="muted" id="pairno"></div>
+      <p class="q" id="question"></p>
+      <details><summary>원문 이메일 스레드 보기</summary><pre id="thread"></pre></details>
+    </div>
+
+    <div class="pair">
+      <div class="resp"><h3>왼쪽 응답</h3><pre id="left"></pre></div>
+      <div class="resp"><h3>오른쪽 응답</h3><pre id="right"></pre></div>
+    </div>
+
+    <div class="choices">
+      <button data-c="left">왼쪽이 낫다 <kbd>1</kbd></button>
+      <button data-c="tie">차이 없다 <kbd>2</kbd></button>
+      <button data-c="right">오른쪽이 낫다 <kbd>3</kbd></button>
+    </div>
+    <div class="note">
+      <label for="note">판단 근거(선택)</label>
+      <input id="note" type="text" maxlength="300" placeholder="한 줄 메모">
+    </div>
+
+    <div class="nav">
+      <button id="prev">← 이전</button>
+      <button id="nextUndone">다음 미평가 쌍으로</button>
+      <button id="next">다음 →</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var BASE = "A0";
+  var OTHERS = ["A0p", "A1a", "A1b", "A1c", "A2a", "A2b", "A2c"];
+
+  // ---- 시드 기반 난수 (평가자 ID로 재현 가능) ----
+  function xmur3(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19);
+    }
+    return function () {
+      h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return (h ^= h >>> 16) >>> 0;
+    };
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rng(seedStr) { return mulberry32(xmur3(seedStr)()); }
+
+  // ---- 저장소 (실패해도 동작) ----
+  function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) {} }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = null, pairs = [], state = { idx: 0, judg: {} }, evaluator = "", storeKey = "";
+
+  function taskOf(r) {
+    if (r.task_type) return r.task_type;
+    if (r.metrics && r.metrics.task) return r.metrics.task;
+    var m = /-(T\d)$/.exec(r.item_id || "");
+    return m ? m[1] : null;
+  }
+  function textOf(r) {
+    // 품질은 복원 후 응답으로 본다 (원칙 5)
+    return (typeof r.restored === "string") ? r.restored : (r.raw || "");
+  }
+  function splitPrompt(p) {
+    var t = "", q = "";
+    var i = p.indexOf("[스레드]"), j = p.indexOf("[질문]");
+    if (i >= 0 && j > i) { t = p.slice(i + 6, j).trim(); q = p.slice(j + 4).trim(); }
+    else { q = p; }
+    return { thread: t, question: q };
+  }
+
+  function parseFile(text) {
+    var out = [], bad = 0;
+    var trimmed = text.trim();
+    if (trimmed.charAt(0) === "[") {           // JSON 배열도 허용
+      try { return { rows: JSON.parse(trimmed), bad: 0 }; } catch (e) {}
+    }
+    trimmed.split(/\r?\n/).forEach(function (line) {
+      if (!line.trim()) return;
+      try { out.push(JSON.parse(line)); } catch (e) { bad++; }
+    });
+    return { rows: out, bad: bad };
+  }
+
+  function buildPairs(all) {
+    var byItem = {}, warn = [];
+    all.forEach(function (r) {
+      if (taskOf(r) !== "T3") return;
+      byItem[r.item_id] = byItem[r.item_id] || {};
+      if (!byItem[r.item_id][r.arm]) byItem[r.item_id][r.arm] = r;   // 중복 행은 첫 번째만
+    });
+    var list = [];
+    Object.keys(byItem).sort().forEach(function (iid) {
+      var arms = byItem[iid];
+      if (!arms[BASE]) { warn.push(iid + ": A0 없음 → 제외"); return; }
+      OTHERS.forEach(function (a) {
+        if (!arms[a]) { warn.push(iid + ": " + a + " 없음"); return; }
+        var pid = iid + "|" + BASE + "|" + a;
+        var flip = rng(evaluator + "::" + pid)() < 0.5;      // true면 기준(A0)이 오른쪽
+        var sp = splitPrompt(arms[BASE].prompt || "");        // 요청문은 항상 원본(A0) 프롬프트에서
+        list.push({
+          pair_id: pid, item_id: iid, other: a,
+          left_arm: flip ? a : BASE, right_arm: flip ? BASE : a,
+          left: textOf(flip ? arms[a] : arms[BASE]), right: textOf(flip ? arms[BASE] : arms[a]),
+          question: sp.question, thread: sp.thread
+        });
+      });
+    });
+    // 제시 순서도 평가자 시드로 섞는다 (순서 효과 방지)
+    var r = rng(evaluator + "::order");
+    for (var i = list.length - 1; i > 0; i--) {
+      var j = Math.floor(r() * (i + 1)); var t = list[i]; list[i] = list[j]; list[j] = t;
+    }
+    return { pairs: list, warn: warn };
+  }
+
+  function save() { lsSet(storeKey, JSON.stringify(state)); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function nowTs() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function doneCount() { return pairs.filter(function (p) { return state.judg[p.pair_id]; }).length; }
+
+  function render() {
+    var p = pairs[state.idx], j = state.judg[p.pair_id];
+    $("pairno").textContent = "쌍 " + (state.idx + 1) + " / " + pairs.length;
+    $("question").textContent = p.question;
+    $("thread").textContent = p.thread;
+    $("left").textContent = p.left;
+    $("right").textContent = p.right;
+    $("note").value = j ? (j.note || "") : "";
+    Array.prototype.forEach.call(document.querySelectorAll(".choices button"), function (b) {
+      b.classList.toggle("on", !!j && j.choice === b.getAttribute("data-c"));
+    });
+    var d = doneCount();
+    $("count").textContent = d + " / " + pairs.length + " 완료";
+    $("bar").style.width = (100 * d / pairs.length) + "%";
+    $("prev").disabled = state.idx === 0;
+    $("next").disabled = state.idx === pairs.length - 1;
+    window.scrollTo(0, 0);
+  }
+
+  function choose(c) {
+    var p = pairs[state.idx];
+    var winner = c === "left" ? p.left_arm : c === "right" ? p.right_arm : null;
+    state.judg[p.pair_id] = {
+      evaluator: evaluator, pair_id: p.pair_id, shown_left: p.left_arm,
+      choice: c, winner_arm: winner, note: $("note").value.trim(), ts: nowTs()
+    };
+    save(); render();
+  }
+
+  function go(i) {
+    commitNote();
+    state.idx = Math.max(0, Math.min(pairs.length - 1, i)); save(); render();
+  }
+  function commitNote() {
+    var p = pairs[state.idx], j = state.judg[p.pair_id];
+    if (j && j.note !== $("note").value.trim()) { j.note = $("note").value.trim(); save(); }
+  }
+
+  // ---- 이벤트 ----
+  function checkReady() { $("start").disabled = !($("evaluator").value.trim() && rows); }
+  $("evaluator").addEventListener("input", checkReady);
+  $("file").addEventListener("change", function (ev) {
+    var f = ev.target.files[0]; if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var res = parseFile(String(reader.result));
+      rows = res.rows;
+      var n3 = rows.filter(function (r) { return taskOf(r) === "T3"; }).length;
+      var m = $("loadmsg"); m.classList.remove("hidden");
+      m.textContent = "불러온 행 " + rows.length + "개 (T3 행 " + n3 + "개)" + (res.bad ? ", 읽지 못한 줄 " + res.bad + "개" : "");
+      checkReady();
+    };
+    reader.readAsText(f, "utf-8");
+  });
+  $("start").addEventListener("click", function () {
+    evaluator = $("evaluator").value.trim();
+    var b = buildPairs(rows);
+    pairs = b.pairs;
+    if (!pairs.length) {
+      var m = $("loadmsg"); m.classList.remove("hidden");
+      m.textContent = "만들 수 있는 T3 쌍이 없습니다. " + b.warn.slice(0, 5).join(" / "); return;
+    }
+    var sig = xmur3(pairs.map(function (p) { return p.pair_id; }).sort().join(","))().toString(36);
+    storeKey = "t3cmp:v1:" + evaluator + ":" + sig;
+    var saved = lsGet(storeKey);
+    if (saved) { try { var s = JSON.parse(saved); if (s && s.judg) state = s; } catch (e) {} }
+    if (state.idx >= pairs.length) state.idx = 0;
+    $("who").textContent = "평가자: " + evaluator + (b.warn.length ? "  (경고 " + b.warn.length + "건: " + b.warn.slice(0, 2).join(", ") + ")" : "");
+    $("setup").classList.add("hidden"); $("eval").classList.remove("hidden");
+    render();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".choices button"), function (b) {
+    b.addEventListener("click", function () { choose(b.getAttribute("data-c")); });
+  });
+  $("note").addEventListener("change", commitNote);
+  $("prev").addEventListener("click", function () { go(state.idx - 1); });
+  $("next").addEventListener("click", function () { go(state.idx + 1); });
+  $("nextUndone").addEventListener("click", function () {
+    for (var k = 1; k <= pairs.length; k++) {
+      var i = (state.idx + k) % pairs.length;
+      if (!state.judg[pairs[i].pair_id]) { go(i); return; }
+    }
+    alertLike("모든 쌍을 평가했습니다. 결과를 내보내세요.");
+  });
+  function alertLike(t) { $("pairno").textContent = t; }
+  $("export").addEventListener("click", function () {
+    commitNote();
+    var out = pairs.map(function (p) { return state.judg[p.pair_id]; }).filter(Boolean)
+      .sort(function (a, b) { return a.pair_id < b.pair_id ? -1 : 1; });
+    var blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "t3_pairwise_" + evaluator + "_" + nowTs().replace(/[:T]/g, "") + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  document.addEventListener("keydown", function (e) {
+    if ($("eval").classList.contains("hidden")) return;
+    if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+    if (e.key === "1") choose("left");
+    else if (e.key === "2") choose("tie");
+    else if (e.key === "3") choose("right");
+    else if (e.key === "ArrowLeft") go(state.idx - 1);
+    else if (e.key === "ArrowRight") go(state.idx + 1);
+  });
+})();
+</script>
+</body>
+</html>

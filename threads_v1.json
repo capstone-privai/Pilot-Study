@@ -1,0 +1,1578 @@
+{
+  "_doc": "마커 문법: {{엔티티ID|표면형}} -> 렌더링 시 표면형만 남고 오프셋이 자동 기록됨",
+  "threads": [
+    {
+      "thread_id": "th-01",
+      "template": "제목: [회신] 3분기 결산 검토 미팅 일정\n\n────────────────────────────\n[2] 2026-10-06 (월) 09:14\n보낸사람: {{E1|박지훈}} <{{E1c|jhpark@daesung.co.kr}}>\n받는사람: {{E2|최유진}}, {{E3|김민수}}\n\n{{E2|유진}}님, {{E3|민수}}님. {{E1|박지훈}}입니다.\n저희 팀 쪽은 10월 15일 수요일 오후 4시에 3층 회의실 A로 잡아두었습니다.\n회계팀 참석 인원은 4명입니다.\n\n────────────────────────────\n[1] 2026-10-06 (월) 11:42\n보낸사람: {{E2|최유진}} <{{E2c|yjchoi@daesung.co.kr}}>\n받는사람: {{E1|박지훈}}, {{E3|김민수}}\n\n{{E1|지훈}}님 말씀 감사합니다. 다만 전략팀 일정과 겹쳐서,\n10월 17일 금요일 오전 10시 30분, 본관 세미나실로 변경 요청드립니다.\n참석은 3명입니다.\n\n────────────────────────────\n[3] 2026-10-06 (월) 10:55\n보낸사람: {{E3|김민수}} <{{E3c|mskim@daesung.co.kr}}>\n받는사람: {{E1|박지훈}}, {{E2|최유진}}\n\n두 분께. {{E3|김민수}}입니다.\n저는 10월 16일 목요일 오후 2시, 5층 대회의실이 가장 편합니다.\n연락처는 {{E4|010-4471-2830}}입니다.\n참석 인원은 2명입니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "박지훈": "한서우",
+            "지훈": "서우"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "최유진": "오다인",
+            "유진": "다인"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "김민수": "임가온",
+            "민수": "가온"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "jhpark@daesung.co.kr": "swhan@daesung.co.kr"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "yjchoi@daesung.co.kr": "dioh@daesung.co.kr"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "mskim@daesung.co.kr": "golim@daesung.co.kr"
+          }
+        },
+        "E4": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "010-4471-2830": "010-7712-3395"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-01-T1",
+          "task_type": "T1",
+          "question": "이 스레드에서 제안된 미팅 장소를 모두 나열하세요.",
+          "gold": [
+            "3층 회의실 A",
+            "본관 세미나실",
+            "5층 대회의실"
+          ],
+          "slots": [
+            "3층\\s*회의실",
+            "본관\\s*세미나실",
+            "5층\\s*대회의실"
+          ],
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential"
+          },
+          "_note": "장소는 이름 없이도 열거 가능 -> PERSON이 진짜 무관. A1a에서도 만점이 나와야 정상"
+        },
+        {
+          "question_id": "th-01-T2",
+          "task_type": "T2",
+          "question": "최유진이 제안한 미팅 일시와 장소는 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "10월 17일 금요일 오전 10시 30분, 본관 세미나실",
+            "10월 17일 오전 10시 30분 본관 세미나실",
+            "10/17 10:30 본관 세미나실"
+          ],
+          "slots": [
+            "10\\s*[월/]\\s*17",
+            "10\\s*[시:]\\s*30",
+            "본관\\s*세미나실"
+          ],
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4": "not_essential"
+          },
+          "_note": "표시순서[2,1,3]와 발신시각(09:14,11:42,10:55)이 어긋나 있어 위치 휴리스틱으로 못 풂. E2만 essential."
+        },
+        {
+          "question_id": "th-01-T3",
+          "task_type": "T3",
+          "question": "세 사람의 제안을 각각 정리하고, 참석 인원이 가장 많은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "박지훈",
+            "최유진",
+            "김민수",
+            "10\\s*[월/]\\s*15",
+            "10\\s*[월/]\\s*16",
+            "10\\s*[월/]\\s*17",
+            "4\\s*명"
+          ],
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4": "not_essential"
+          },
+          "_note": "이름이 출력에 직접 필요 -> PERSON이 essential. 같은 스레드인데 T1과 라벨이 뒤집힘."
+        }
+      ]
+    },
+    {
+      "thread_id": "th-02",
+      "template": "제목: [회신] 하반기 협력사 워크숍 장소 선정\n\n────────────────────────────\n[1] 2026-10-12 (월) 14:20\n보낸사람: {{E4|윤채원}} <{{E4c|chaewon.yoon@hangyeol-logis.example}}>\n받는사람: {{E1|이서준}}, {{E2|정하은}}, {{E3|강도윤}}\n\n{{E1|서준}}님, {{E2|하은}}님, {{E3|도윤}}님. {{E4|윤채원}}입니다.\n비용을 줄이려면 11월 19일 목요일 본사 대강당도 괜찮을 것 같습니다.\n1인당 예산은 6만 원이고, 참석 가능 인원은 15명입니다.\n{{E6|(주)도래정밀}} 담당자분들도 함께 초청할 수 있습니다.\n\n────────────────────────────\n[2] 2026-10-12 (월) 09:05\n보낸사람: {{E1|이서준}} <{{E1c|seojun.lee@hangyeol-logis.example}}>\n받는사람: {{E2|정하은}}, {{E3|강도윤}}, {{E4|윤채원}}\n\n안녕하세요, {{E1|이서준}}입니다.\n협력사 워크숍은 11월 13일 금요일 가평 연수원에서 당일 일정으로 진행하면 좋겠습니다.\n1인당 예산은 12만 원, 참석 가능 인원은 18명으로 파악됩니다.\n의견 부탁드립니다.\n\n────────────────────────────\n[3] 2026-10-12 (월) 11:30\n보낸사람: {{E2|정하은}} <{{E2c|haeun.jung@hangyeol-logis.example}}>\n받는사람: {{E1|이서준}}, {{E3|강도윤}}, {{E4|윤채원}}\n\n{{E1|서준}}님 안 감사합니다. {{E2|정하은}}입니다.\n이동 거리를 고려하면 11월 20일 금요일 송도 회의센터가 낫다고 봅니다.\n1인당 예산은 9만 원이고, 참석 가능 인원은 22명입니다.\n대관 확정은 다음 주 월요일까지 해야 합니다.\n\n────────────────────────────\n[4] 2026-10-12 (월) 16:45\n보낸사람: {{E3|강도윤}} <{{E3c|doyun.kang@hangyeol-logis.example}}>\n받는사람: {{E1|이서준}}, {{E2|정하은}}, {{E4|윤채원}}\n\n{{E3|강도윤}}입니다. 저는 11월 27일 금요일 양평 세미나하우스를 제안드립니다.\n1인당 15만 원이지만 참석 가능 인원이 25명으로 가장 많습니다.\n예약 문의는 제 휴대폰 {{E5|010-5238-9071}}로 주세요.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "이서준": "문재하",
+            "서준": "재하"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "정하은": "배소율",
+            "하은": "소율"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "강도윤": "신태오",
+            "도윤": "태오"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "윤채원": "구나린",
+            "채원": "나린"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "seojun.lee@hangyeol-logis.example": "jaeha.moon@hangyeol-logis.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "haeun.jung@hangyeol-logis.example": "soyul.bae@hangyeol-logis.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "doyun.kang@hangyeol-logis.example": "taeo.shin@hangyeol-logis.example"
+          }
+        },
+        "E4c": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "chaewon.yoon@hangyeol-logis.example": "narin.koo@hangyeol-logis.example"
+          }
+        },
+        "E5": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "010-5238-9071": "010-8264-1307"
+          }
+        },
+        "E6": {
+          "type": "ORG",
+          "parent": null,
+          "pseudo": {
+            "(주)도래정밀": "(주)미리내정공"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-02-T1",
+          "task_type": "T1",
+          "question": "제안된 1인당 예산 중 가장 낮은 금액은 얼마입니까?",
+          "gold": [
+            "6만 원",
+            "6만원",
+            "60,000원"
+          ],
+          "slots": [
+            "(?<!\\d)6\\s*만\\s*원|60,?000\\s*원"
+          ],
+          "_note": "최저 예산은 금액만 비교하면 됨 -> 누가 냈는지 무관. PERSON 전원 not_essential",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-02-T2",
+          "task_type": "T2",
+          "question": "정하은이 제안한 워크숍 날짜와 장소는 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 20일 금요일 송도 회의센터",
+            "11월 20일 송도 회의센터",
+            "11/20 송도 회의센터"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*20",
+            "송도\\s*회의센터"
+          ],
+          "_note": "지목 인물 E2(물리 3번째, 표시[3], 시각 2번째)만 essential. 시각 순서 [3,1,2,4]로 첫 메일이 중간에 끼어듦",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-02-T3",
+          "task_type": "T3",
+          "question": "네 사람의 제안을 각각 정리하고, 총비용(1인당 예산×참석 인원)이 200만 원 이하인 안 중 참석 인원이 가장 많은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "이서준|서준",
+            "정하은|하은",
+            "강도윤|도윤",
+            "윤채원|채원",
+            "11\\s*[월/]\\s*20",
+            "송도",
+            "(?<!\\d)22\\s*명",
+            "(?<!\\d)198\\s*만"
+          ],
+          "_note": "회신에 참가자 이름이 직접 필요 -> 참가자 essential. 추천=정하은(198만 원, 22명). 협력사명 E6은 not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E4": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4c": "essential",
+            "E5": "essential",
+            "E6": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-03",
+      "template": "제목: [회신] 신제품 발표 리허설 일정\n\n────────────────────────────\n[2] 2026-10-27 (화) 13:10\n보낸사람: {{E2|류건우}} <{{E2c|geonwoo.ryu@mirsol.example}}>\n받는사람: {{E1|오세린}}, {{E3|표다온}}\n\n{{E1|세린}}님, {{E3|다온}}님. {{E2|류건우}}입니다.\n리허설은 11월 4일 수요일 오후 3시, 7층 스튜디오에서 하면 어떨까요?\n영상팀이 장비를 맡을 수 있고, 사용 가능 시간은 2시간입니다.\n{{E4|(주)늘봄유통}} 시연 자료도 그때 함께 점검하겠습니다.\n\n────────────────────────────\n[3] 2026-10-27 (화) 16:35\n보낸사람: {{E1|오세린}} <{{E1c|serin.oh@mirsol.example}}>\n받는사람: {{E2|류건우}}, {{E3|표다온}}\n\n{{E2|건우}}님 제안 잘 봤습니다. {{E1|오세린}}입니다.\n저는 11월 5일 목요일 오전 9시 30분, 2층 강당을 제안합니다.\n기획팀이 진행을 맡고, 강당은 3시간까지 쓸 수 있어서\n전체 순서를 두 번 돌려볼 수 있습니다.\n\n────────────────────────────\n[1] 2026-10-27 (화) 09:50\n보낸사람: {{E3|표다온}} <{{E3c|daon.pyo@mirsol.example}}>\n받는사람: {{E1|오세린}}, {{E2|류건우}}\n\n두 분께, {{E3|표다온}}입니다.\n가장 이른 일정으로는 11월 3일 화요일 오후 5시, 지하 1층 다목적홀이 비어 있습니다.\n디자인팀이 무대 세팅을 맡겠습니다.\n다만 다목적홀 대관은 90분만 가능하다고 합니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "오세린": "위다희",
+            "세린": "다희"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "류건우": "피승민",
+            "건우": "승민"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "표다온": "계유빈",
+            "다온": "유빈"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "serin.oh@mirsol.example": "dahee.wi@mirsol.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "geonwoo.ryu@mirsol.example": "seungmin.pi@mirsol.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "daon.pyo@mirsol.example": "yubin.gye@mirsol.example"
+          }
+        },
+        "E4": {
+          "type": "ORG",
+          "parent": null,
+          "pseudo": {
+            "(주)늘봄유통": "(주)새길상사"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-03-T1",
+          "task_type": "T1",
+          "question": "제안된 리허설 날짜 중 가장 빠른 날짜는 언제입니까?",
+          "gold": [
+            "11월 3일",
+            "11/3"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*3(?!\\d)"
+          ],
+          "_note": "날짜 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-03-T2",
+          "task_type": "T2",
+          "question": "류건우가 제안한 리허설 일시와 장소는 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 4일 수요일 오후 3시 7층 스튜디오",
+            "11월 4일 오후 3시 7층 스튜디오",
+            "11/4 15:00 7층 스튜디오"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*4(?!\\d)",
+            "오후\\s*3\\s*시|15\\s*:\\s*00",
+            "7층\\s*스튜디오"
+          ],
+          "_note": "지목 인물 E2(물리 1번째, 표시[2], 시각 2번째)만 essential. 순환 이동 패턴 [2,3,1]",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-03-T3",
+          "task_type": "T3",
+          "question": "세 사람의 제안을 각각 정리하고, 리허설 가능 시간이 가장 긴 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "오세린|세린",
+            "류건우|건우",
+            "표다온|다온",
+            "11\\s*[월/]\\s*3(?!\\d)",
+            "11\\s*[월/]\\s*4(?!\\d)",
+            "11\\s*[월/]\\s*5(?!\\d)",
+            "(?<!\\d)3\\s*시간",
+            "2층\\s*강당"
+          ],
+          "_note": "참가자 이름이 회신에 필요. 추천=오세린(3시간). 고객사명 E4는 not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-04",
+      "template": "제목: [회신] 사내 포털 개편 외주 견적 비교\n\n────────────────────────────\n[1] 2026-11-02 (월) 17:30\n보낸사람: {{E1|서민재}} <{{E1c|minjae.seo@chungram-soft.example}}>\n받는사람: {{E2|권나연}}, {{E3|백승호}}, {{E4|차유나}}\n\n{{E1|서민재}}입니다(사번 {{E5|CR-20417}}).\n검토해 보니 견적 4,800만 원, 12월 18일 납품, 유지보수 6개월 조건이 무난해 보입니다.\n계약금은 법인계좌 {{E6|301-4492-5817-06}}에서 집행할 예정입니다.\n\n────────────────────────────\n[4] 2026-11-02 (월) 08:40\n보낸사람: {{E2|권나연}} <{{E2c|nayeon.kwon@chungram-soft.example}}>\n받는사람: {{E1|서민재}}, {{E3|백승호}}, {{E4|차유나}}\n\n{{E2|권나연}}입니다. 예산을 우선하면 3,900만 원 안이 가장 저렴합니다.\n다만 납품이 1월 22일이고 유지보수는 3개월뿐입니다.\n업체 사무실({{E7|경기 성남시 분당구 솔빛로 88}})에서 대면 미팅도 가능합니다.\n\n────────────────────────────\n[3] 2026-11-02 (월) 10:15\n보낸사람: {{E3|백승호}} <{{E3c|seungho.baek@chungram-soft.example}}>\n받는사람: {{E1|서민재}}, {{E2|권나연}}, {{E4|차유나}}\n\n{{E1|민재}}님, {{E2|나연}}님, {{E4|유나}}님. {{E3|백승호}}입니다.\n품질을 보면 5,600만 원 안을 권합니다. 12월 4일 납품이고\n유지보수를 12개월 보장해 주기 때문에 장기적으로는 유리합니다.\n초기 비용보다 운영 비용을 먼저 봐야 합니다.\n\n────────────────────────────\n[2] 2026-11-02 (월) 13:50\n보낸사람: {{E4|차유나}} <{{E4c|yuna.cha@chungram-soft.example}}>\n받는사람: {{E1|서민재}}, {{E2|권나연}}, {{E3|백승호}}\n\n{{E4|차유나}}입니다. 절충안으로 4,200만 원 견적을 제안드립니다.\n납품은 12월 30일까지, 유지보수는 6개월입니다.\n{{E3|승호}}님 안보다 1,400만 원 저렴하면서 연내 완료가 가능합니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "서민재": "노태민",
+            "민재": "태민"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "권나연": "어진주",
+            "나연": "진주"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "백승호": "남기찬",
+            "승호": "기찬"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "차유나": "길서아",
+            "유나": "서아"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "minjae.seo@chungram-soft.example": "taemin.noh@chungram-soft.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "nayeon.kwon@chungram-soft.example": "jinju.eo@chungram-soft.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "seungho.baek@chungram-soft.example": "gichan.nam@chungram-soft.example"
+          }
+        },
+        "E4c": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "yuna.cha@chungram-soft.example": "seoa.gil@chungram-soft.example"
+          }
+        },
+        "E5": {
+          "type": "ID_NUM",
+          "parent": "E1",
+          "pseudo": {
+            "CR-20417": "CR-58103"
+          }
+        },
+        "E6": {
+          "type": "ASSET",
+          "parent": null,
+          "pseudo": {
+            "301-4492-5817-06": "301-7710-2934-15"
+          }
+        },
+        "E7": {
+          "type": "LOCATION",
+          "parent": null,
+          "pseudo": {
+            "경기 성남시 분당구 솔빛로 88": "경기 안양시 동안구 달빛로 21"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-04-T1",
+          "task_type": "T1",
+          "question": "제안된 견적 금액 중 가장 높은 금액은 얼마입니까?",
+          "gold": [
+            "5,600만 원",
+            "5600만 원",
+            "5600만원"
+          ],
+          "slots": [
+            "5,?600\\s*만"
+          ],
+          "_note": "금액 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-04-T2",
+          "task_type": "T2",
+          "question": "차유나가 제안한 견적 금액과 납품 기한은 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "4,200만 원 12월 30일",
+            "4200만 원 12월 30일",
+            "12월 30일 4,200만 원"
+          ],
+          "slots": [
+            "4,?200\\s*만",
+            "12\\s*[월/]\\s*30"
+          ],
+          "_note": "지목 인물 E4(물리 4번째=마지막, 표시[2], 시각 3번째)만 essential. 표시번호 [1,4,3,2], 시각 [4,1,2,3]",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-04-T3",
+          "task_type": "T3",
+          "question": "네 사람의 제안을 각각 정리하고, 연내(12월 31일 이전) 납품이 가능한 안 중 견적 금액이 가장 낮은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "서민재|민재",
+            "권나연|나연",
+            "백승호|승호",
+            "차유나|유나",
+            "4,?200\\s*만",
+            "12\\s*[월/]\\s*30",
+            "3,?900\\s*만",
+            "1\\s*[월/]\\s*22"
+          ],
+          "_note": "참가자 이름 필요. 추천=차유나(4,200만). 사번 E5는 부모 상속으로 essential(원칙1과 'T3 연락처 not_essential' 충돌 사례). 법인계좌·업체주소는 not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E4": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4c": "essential",
+            "E5": "essential",
+            "E6": "not_essential",
+            "E7": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-05",
+      "template": "제목: [회신] 3분기 경영 보고서 마감 일정 조율\n\n────────────────────────────\n[1] 2026-11-05 (목) 16:00\n보낸사람: {{E1|탁현우}} <{{E1c|hyunwoo.tak@maruen-bio.example}}>\n받는사람: {{E2|봉수아}}, {{E3|진태린}}\n\n{{E2|수아}}님, {{E3|태린}}님께. {{E1|탁현우}}입니다.\n3분기 보고서는 초안 11월 12일 목요일, 최종 11월 23일 월요일 마감을 제안합니다.\n재무팀이 취합을 맡으면 초안 이후 검토 기간을 충분히 확보할 수 있습니다.\n\n────────────────────────────\n[2] 2026-11-05 (목) 11:20\n보낸사람: {{E2|봉수아}} <{{E2c|sua.bong@maruen-bio.example}}>\n받는사람: {{E1|탁현우}}, {{E3|진태린}}\n\n{{E2|봉수아}}입니다. 결재 시스템상 사번({{E4|MB-11873}})으로 올리겠습니다.\n경영지원팀 인력 사정상 초안 11월 18일 수요일, 최종 11월 25일 수요일이 현실적입니다.\n{{E6|해솔회계법인}} 감사 제출일은 11월 24일로 전달받았습니다.\n\n────────────────────────────\n[3] 2026-11-05 (목) 09:45\n보낸사람: {{E3|진태린}} <{{E3c|taerin.jin@maruen-bio.example}}>\n받는사람: {{E1|탁현우}}, {{E2|봉수아}}\n\n{{E3|진태린}}입니다. 사번은 {{E5|MB-09342}}입니다.\n전략기획팀은 초안 11월 13일 금요일, 최종 11월 20일 금요일 일정으로 빠르게 끝내는 안을 드립니다.\n감사 일정 전에 여유를 두는 편이 안전하다고 생각합니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "탁현우": "천준서",
+            "현우": "준서"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "봉수아": "담하린",
+            "수아": "하린"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "진태린": "국은솔",
+            "태린": "은솔"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "hyunwoo.tak@maruen-bio.example": "junseo.cheon@maruen-bio.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "sua.bong@maruen-bio.example": "harin.dam@maruen-bio.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "taerin.jin@maruen-bio.example": "eunsol.kook@maruen-bio.example"
+          }
+        },
+        "E4": {
+          "type": "ID_NUM",
+          "parent": "E2",
+          "pseudo": {
+            "MB-11873": "MB-40265"
+          }
+        },
+        "E5": {
+          "type": "ID_NUM",
+          "parent": "E3",
+          "pseudo": {
+            "MB-09342": "MB-73518"
+          }
+        },
+        "E6": {
+          "type": "ORG",
+          "parent": null,
+          "pseudo": {
+            "해솔회계법인": "바름회계법인"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-05-T1",
+          "task_type": "T1",
+          "question": "제안된 최종 마감일 중 가장 늦은 날짜는 언제입니까?",
+          "gold": [
+            "11월 25일",
+            "11/25"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*25"
+          ],
+          "_note": "날짜 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-05-T2",
+          "task_type": "T2",
+          "question": "봉수아가 제안한 초안 마감일과 최종 마감일은 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "초안 11월 18일 최종 11월 25일",
+            "11월 18일 11월 25일",
+            "초안 11월 18일 수요일 최종 11월 25일 수요일"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*18",
+            "11\\s*[월/]\\s*25"
+          ],
+          "_note": "지목 인물 E2(물리 2번째, 표시[2], 시각 2번째)만 essential. 시각 완전 역순 [3,2,1]",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4": "essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-05-T3",
+          "task_type": "T3",
+          "question": "세 사람의 제안을 각각 정리하고, 감사 제출일 이전에 최종 마감되는 안 중 초안부터 최종까지 검토 기간이 가장 긴 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "탁현우|현우",
+            "봉수아|수아",
+            "진태린|태린",
+            "11\\s*[월/]\\s*12",
+            "11\\s*[월/]\\s*23",
+            "11\\s*[월/]\\s*24",
+            "(?<!\\d)11\\s*일\\s*(간|동안)?(?!\\d)"
+          ],
+          "_note": "참가자 이름 필요. 추천=탁현우(검토 11일). 사번 E4/E5는 부모 상속으로 essential. 회계법인명 E6 not_essential. slot 7개",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4": "essential",
+            "E5": "essential",
+            "E6": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-06",
+      "template": "제목: [회신] 고객사 공장 방문 일정 및 이동 수단\n\n────────────────────────────\n[3] 2026-10-29 (목) 12:10\n보낸사람: {{E2|모지안}} <{{E2c|jian.mo@beori-tech.example}}>\n받는사람: {{E1|소정우}}, {{E3|설이준}}, {{E4|엄서하}}\n\n{{E2|모지안}}입니다. {{E8|(주)파랑마린}} 방문은 11월 10일 화요일 오전 11시 도착으로 잡으면 좋겠습니다.\nKTX로 서울역에서 7시 30분에 출발하며 교통비는 1인 왕복 12만 원입니다.\n공장 주소는 {{E6|부산 강서구 녹산산단17로 42}}입니다.\n\n────────────────────────────\n[1] 2026-10-29 (목) 17:05\n보낸사람: {{E1|소정우}} <{{E1c|jungwoo.so@beori-tech.example}}>\n받는사람: {{E2|모지안}}, {{E3|설이준}}, {{E4|엄서하}}\n\n{{E2|지안}}님, {{E3|이준}}님, {{E4|서하}}님. {{E1|소정우}}입니다.\n저는 11월 12일 목요일 오후 2시 방문을 제안합니다. 회사 차량({{E7|38나 2716}})으로\n본사 주차장에서 출발하면 유류비와 통행료를 합쳐 8만 원이면 됩니다.\n\n────────────────────────────\n[4] 2026-10-29 (목) 08:55\n보낸사람: {{E3|설이준}} <{{E3c|ijun.seol@beori-tech.example}}>\n받는사람: {{E1|소정우}}, {{E2|모지안}}, {{E4|엄서하}}\n\n{{E3|설이준}}입니다. 이동 시간을 줄이려면 11월 9일 월요일 오후 4시 방문이 좋겠습니다.\n김포공항에서 항공편을 이용하고, 교통비는 1인 왕복 16만 원입니다.\n방문팀은 3명으로 확정되었습니다.\n\n────────────────────────────\n[2] 2026-10-29 (목) 14:30\n보낸사람: {{E4|엄서하}} <{{E4c|seoha.eom@beori-tech.example}}>\n받는사람: {{E1|소정우}}, {{E2|모지안}}, {{E3|설이준}}\n\n{{E4|엄서하}}입니다. 비용을 아끼는 쪽으로 11월 11일 수요일 오전 10시 도착을 제안드립니다.\n강남터미널에서 고속버스를 타면 1인 왕복 6만 원입니다.\n일정이 바뀌면 {{E5|010-6619-4082}}로 연락 주세요.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "소정우": "지민혁",
+            "정우": "민혁"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "모지안": "형다은",
+            "지안": "다은"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "설이준": "빈도현",
+            "이준": "도현"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "엄서하": "복나은",
+            "서하": "나은"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "jungwoo.so@beori-tech.example": "minhyuk.ji@beori-tech.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "jian.mo@beori-tech.example": "daeun.hyung@beori-tech.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "ijun.seol@beori-tech.example": "dohyun.bin@beori-tech.example"
+          }
+        },
+        "E4c": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "seoha.eom@beori-tech.example": "naeun.bok@beori-tech.example"
+          }
+        },
+        "E5": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "010-6619-4082": "010-9142-3378"
+          }
+        },
+        "E6": {
+          "type": "LOCATION",
+          "parent": null,
+          "pseudo": {
+            "부산 강서구 녹산산단17로 42": "울산 남구 해오름길 9"
+          }
+        },
+        "E7": {
+          "type": "OTHER",
+          "parent": "E1",
+          "pseudo": {
+            "38나 2716": "52러 8041"
+          },
+          "note": "차량번호. 법인차량이면 ASSET, 개인 식별 수단이면 ID_NUM으로 볼 수 있어 경계 사례. 발신자가 운전하는 차량으로 보고 E1 자식으로 둠"
+        },
+        "E8": {
+          "type": "ORG",
+          "parent": null,
+          "pseudo": {
+            "(주)파랑마린": "(주)은빛해운"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-06-T1",
+          "task_type": "T1",
+          "question": "제안된 방문 날짜 중 가장 늦은 날짜는 언제입니까?",
+          "gold": [
+            "11월 12일",
+            "11/12"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*12"
+          ],
+          "_note": "날짜 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential",
+            "E8": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-06-T2",
+          "task_type": "T2",
+          "question": "모지안이 제안한 방문 일시와 교통수단은 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 10일 화요일 오전 11시 KTX",
+            "11월 10일 오전 11시 KTX",
+            "11/10 11시 KTX"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*10",
+            "11\\s*시",
+            "KTX"
+          ],
+          "_note": "지목 인물 E2(물리 1번째, 표시[3], 시각 2번째)만 essential. 두 쌍 교차 패턴(시각 [2,4,1,3])",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential",
+            "E8": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-06-T3",
+          "task_type": "T3",
+          "question": "네 사람의 제안을 각각 정리하고, 방문팀 3명 기준 총 교통비가 가장 적은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "소정우|정우",
+            "모지안|지안",
+            "설이준|이준",
+            "엄서하|서하",
+            "11\\s*[월/]\\s*12",
+            "차량",
+            "(?<!\\d)8\\s*만",
+            "(?<!\\d)18\\s*만"
+          ],
+          "_note": "참가자 이름 필요. 추천=소정우 회사 차량(총 8만 원; 버스는 3명×6만=18만). 휴대폰 E5·차량번호 E7은 상속으로 essential, 공장주소 E6·고객사명 E8 not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E4": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4c": "essential",
+            "E5": "essential",
+            "E6": "not_essential",
+            "E7": "essential",
+            "E8": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-07",
+      "template": "제목: [회신] 하반기 직무 교육 과정 및 강사 섭외\n\n────────────────────────────\n[1] 2026-10-20 (화) 15:30\n보낸사람: {{E3|추예린}} <{{E3c|yerin.choo@purungyeol.example}}>\n받는사람: {{E1|여은호}}, {{E2|방시온}}\n\n{{E3|추예린}}입니다. 하반기 직무 교육은 '데이터 리터러시' 과정을 제안합니다.\n11월 17일 화요일 오후 2시, 강사료 180만 원이며 수강 인원은 40명까지 가능합니다.\n{{E5|(사)배움숲연구소}} 소속 강사로 섭외하겠습니다.\n\n────────────────────────────\n[3] 2026-10-20 (화) 09:10\n보낸사람: {{E2|방시온}} <{{E2c|sion.bang@purungyeol.example}}>\n받는사람: {{E1|여은호}}, {{E3|추예린}}\n\n{{E1|은호}}님, {{E3|예린}}님. {{E2|방시온}}입니다.\n요즘 수요가 많은 '생성형 AI 활용' 과정을 11월 24일 화요일 오전 10시에 열면 좋겠습니다.\n강사료는 250만 원이고, 60명까지 수강할 수 있습니다.\n\n────────────────────────────\n[2] 2026-10-20 (화) 11:45\n보낸사람: {{E1|여은호}} <{{E1c|eunho.yeo@purungyeol.example}}>\n받는사람: {{E2|방시온}}, {{E3|추예린}}\n\n{{E2|시온}}님 의견 감사합니다. {{E1|여은호}}입니다.\n저는 '보고서 작성법' 과정을 11월 19일 목요일 오후 3시로 제안합니다.\n강사료 120만 원, 수강 인원 35명이며 강사료는 {{E4|1002-731-558204}} 계좌로 입금 요청을 받았습니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "여은호": "팽시현",
+            "은호": "시현"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "방시온": "간우성",
+            "시온": "우성"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "추예린": "모윤아",
+            "예린": "윤아"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "eunho.yeo@purungyeol.example": "sihyun.paeng@purungyeol.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "sion.bang@purungyeol.example": "woosung.gan@purungyeol.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "yerin.choo@purungyeol.example": "yuna.mo@purungyeol.example"
+          }
+        },
+        "E4": {
+          "type": "ASSET",
+          "parent": null,
+          "pseudo": {
+            "1002-731-558204": "1002-448-903516"
+          }
+        },
+        "E5": {
+          "type": "ORG",
+          "parent": null,
+          "pseudo": {
+            "(사)배움숲연구소": "(사)열린길교육원"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-07-T1",
+          "task_type": "T1",
+          "question": "제안된 강사료를 모두 더하면 얼마입니까?",
+          "gold": [
+            "550만 원",
+            "550만원",
+            "5,500,000원"
+          ],
+          "slots": [
+            "(?<!\\d)550\\s*만|5,?500,?000\\s*원"
+          ],
+          "_note": "금액 합산만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential",
+            "E5": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-07-T2",
+          "task_type": "T2",
+          "question": "여은호가 제안한 교육 일시와 강사료는 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 19일 목요일 오후 3시 120만 원",
+            "11월 19일 오후 3시 120만 원",
+            "11/19 15시 120만 원"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*19",
+            "오후\\s*3\\s*시|15\\s*시",
+            "(?<!\\d)120\\s*만"
+          ],
+          "_note": "지목 인물 E1(물리 3번째=마지막, 표시[2], 시각 2번째)만 essential. 두 개만 교차(표시 [1,3,2])",
+          "relevance": {
+            "E1": "essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential",
+            "E5": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-07-T3",
+          "task_type": "T3",
+          "question": "세 사람의 제안을 각각 정리하고, 강사료 200만 원 이내에서 수강 인원이 가장 많은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "여은호|은호",
+            "방시온|시온",
+            "추예린|예린",
+            "데이터\\s*리터러시",
+            "11\\s*[월/]\\s*17",
+            "(?<!\\d)180\\s*만",
+            "(?<!\\d)40\\s*명",
+            "(?<!\\d)250\\s*만"
+          ],
+          "_note": "참가자 이름 필요. 추천=추예린(180만, 40명). 강사료 계좌 E4는 외부 강사 소유라 부모 없음 -> not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4": "not_essential",
+            "E5": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-08",
+      "template": "제목: [회신] DB 서버 정기 점검 작업 시간대\n\n────────────────────────────\n[1] 2026-11-02 (월) 13:00\n보낸사람: {{E4|채로운}} <{{E4c|roun.chae@byeolha-sys.example}}>\n받는사람: {{E1|석주원}}, {{E2|금하윤}}, {{E3|연태경}}\n\n{{E4|채로운}}입니다. DB 서버 점검은 11월 7일 토요일 새벽 2시에 시작하는 안을 제안합니다.\n소요 시간은 4시간, 영향 사용자는 약 300명으로 추산됩니다.\n11월 10일 배포 전에 끝내야 한다는 점 참고 부탁드립니다.\n\n────────────────────────────\n[3] 2026-11-02 (월) 10:30\n보낸사람: {{E1|석주원}} <{{E1c|juwon.seok@byeolha-sys.example}}>\n받는사람: {{E2|금하윤}}, {{E3|연태경}}, {{E4|채로운}}\n\n{{E1|석주원}}입니다. 야간 인력 배치를 고려해 11월 8일 일요일 오후 10시 시작을 제안합니다.\n3시간이면 끝나고, 영향 사용자는 약 850명입니다.\n{{E4|로운}}님, {{E2|하윤}}님 의견 부탁드립니다.\n\n────────────────────────────\n[2] 2026-11-02 (월) 15:10\n보낸사람: {{E2|금하윤}} <{{E2c|hayun.keum@byeolha-sys.example}}>\n받는사람: {{E1|석주원}}, {{E3|연태경}}, {{E4|채로운}}\n\n{{E2|금하윤}}입니다. 주말 대기 인력이 부족해서 11월 11일 수요일 오전 6시 시작도 검토해 주세요.\n2시간이면 충분하지만 출근 시간대라 영향 사용자가 약 1,200명입니다.\n이 경우 배포 일정 조정이 필요합니다.\n\n────────────────────────────\n[4] 2026-11-02 (월) 08:20\n보낸사람: {{E3|연태경}} <{{E3c|taekyung.yeon@byeolha-sys.example}}>\n받는사람: {{E1|석주원}}, {{E2|금하윤}}, {{E4|채로운}}\n\n{{E3|연태경}}입니다. 제가 {{E5|11월 16일부터 20일까지 연차}}라서\n그 전인 11월 14일 토요일 오전 1시에 시작하는 안을 드립니다.\n5시간이 걸리지만 영향 사용자는 약 150명으로 가장 적습니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "석주원": "기주한",
+            "주원": "주한"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "금하윤": "사도희",
+            "하윤": "도희"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "연태경": "용승재",
+            "태경": "승재"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "채로운": "왕보람",
+            "로운": "보람"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "juwon.seok@byeolha-sys.example": "juhan.ki@byeolha-sys.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "hayun.keum@byeolha-sys.example": "dohee.sa@byeolha-sys.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "taekyung.yeon@byeolha-sys.example": "seungjae.yong@byeolha-sys.example"
+          }
+        },
+        "E4c": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "roun.chae@byeolha-sys.example": "boram.wang@byeolha-sys.example"
+          }
+        },
+        "E5": {
+          "type": "TIME",
+          "parent": "E3",
+          "pseudo": {
+            "11월 16일부터 20일까지 연차": "11월 23일부터 27일까지 연차"
+          },
+          "note": "개인 휴가 일정. 태스크 답(점검 일시)과 같은 날짜 표현이라 TIME 태깅이 답을 가릴 위험이 있음 -> 답과 겹치지 않는 날짜로 배치"
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-08-T1",
+          "task_type": "T1",
+          "question": "제안된 점검 소요 시간 중 가장 긴 것은 몇 시간입니까?",
+          "gold": [
+            "5시간",
+            "다섯 시간",
+            "5 시간"
+          ],
+          "slots": [
+            "(?<!\\d)5\\s*시간|다섯\\s*시간"
+          ],
+          "_note": "소요 시간 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-08-T2",
+          "task_type": "T2",
+          "question": "석주원이 제안한 점검 시작 일시와 소요 시간은 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 8일 일요일 오후 10시 3시간",
+            "11월 8일 오후 10시 3시간",
+            "11/8 22시 3시간"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*8(?!\\d)",
+            "오후\\s*10\\s*시|22\\s*시",
+            "(?<!\\d)3\\s*시간"
+          ],
+          "_note": "지목 인물 E1(물리 2번째, 표시[3], 시각 2번째)만 essential. 시각 [3,2,4,1]로 마지막 메일이 가장 이름",
+          "relevance": {
+            "E1": "essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-08-T3",
+          "task_type": "T3",
+          "question": "네 사람의 제안을 각각 정리하고, 11월 10일 배포 이전에 끝나는 안 중 영향 사용자 수가 가장 적은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "석주원|주원",
+            "금하윤|하윤",
+            "연태경|태경",
+            "채로운|로운",
+            "11\\s*[월/]\\s*7(?!\\d)",
+            "(?<!\\d)300\\s*명",
+            "(?<!\\d)4\\s*시간",
+            "11\\s*[월/]\\s*10"
+          ],
+          "_note": "참가자 이름 필요. 추천=채로운(300명). 전체 최소(150명)는 배포 이후라 함정. 부모 없는 PII가 없어 T3의 A2 프롬프트는 A0과 동일해짐(의도된 변주)",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E4": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4c": "essential",
+            "E5": "essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-09",
+      "template": "제목: [회신] 팀 송년회 장소와 일정\n\n────────────────────────────\n[4] 2026-11-16 (월) 11:25\n보낸사람: {{E2|경소윤}} <{{E2c|soyun.kyung@nurion-food.example}}>\n받는사람: {{E1|마승현}}, {{E3|명우진}}, {{E4|선아라}}\n\n{{E2|경소윤}}입니다. 올해 송년회는 12월 18일 금요일 오후 7시, 을지로 한식당을 제안합니다.\n1인 5만 원이고 30명까지 룸 예약이 됩니다.\n연말 결산 때문에 12월 19일부터는 모이기 어렵다고 들었습니다.\n\n────────────────────────────\n[2] 2026-11-16 (월) 18:40\n보낸사람: {{E1|마승현}} <{{E1c|seunghyun.ma@nurion-food.example}}>\n받는사람: {{E2|경소윤}}, {{E3|명우진}}, {{E4|선아라}}\n\n{{E1|마승현}}(사번 {{E6|GN-3310}})입니다.\n비용을 줄이려면 12월 22일 화요일 오후 6시 30분, 사내 라운지에 케이터링을 부르는 방법이 있습니다.\n1인 3만 5천 원에 45명까지 수용 가능합니다.\n\n────────────────────────────\n[1] 2026-11-16 (월) 09:30\n보낸사람: {{E4|선아라}} <{{E4c|ara.sun@nurion-food.example}}>\n받는사람: {{E1|마승현}}, {{E2|경소윤}}, {{E3|명우진}}\n\n{{E4|선아라}}입니다. 분위기를 생각하면 12월 11일 금요일 오후 7시, 성수 루프탑 레스토랑이 좋겠습니다.\n1인 7만 원, 최대 25명입니다. 예약금은 {{E7|3333-08-6627145}} 계좌로 보내면 되고\n문의는 제 번호 {{E5|010-3907-6154}}로 주세요.\n\n────────────────────────────\n[3] 2026-11-16 (월) 14:05\n보낸사람: {{E3|명우진}} <{{E3c|woojin.myung@nurion-food.example}}>\n받는사람: {{E1|마승현}}, {{E2|경소윤}}, {{E4|선아라}}\n\n{{E2|소윤}}님, {{E1|승현}}님, {{E4|아라}}님. {{E3|명우진}}입니다.\n저는 12월 16일 수요일 오후 6시, 여의도 뷔페를 제안드립니다.\n1인 4만 원이고 40명까지 한 홀을 쓸 수 있어 인원 여유가 있습니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "마승현": "육정훈",
+            "승현": "정훈"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "경소윤": "양채은",
+            "소윤": "채은"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "명우진": "도해찬",
+            "우진": "해찬"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "선아라": "부예나",
+            "아라": "예나"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "seunghyun.ma@nurion-food.example": "junghoon.yook@nurion-food.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "soyun.kyung@nurion-food.example": "chaeeun.yang@nurion-food.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "woojin.myung@nurion-food.example": "haechan.do@nurion-food.example"
+          }
+        },
+        "E4c": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "ara.sun@nurion-food.example": "yena.boo@nurion-food.example"
+          }
+        },
+        "E5": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "010-3907-6154": "010-5581-2047"
+          }
+        },
+        "E6": {
+          "type": "ID_NUM",
+          "parent": "E1",
+          "pseudo": {
+            "GN-3310": "GN-7482"
+          }
+        },
+        "E7": {
+          "type": "ASSET",
+          "parent": null,
+          "pseudo": {
+            "3333-08-6627145": "3333-12-9051836"
+          },
+          "note": "식당(사업자)의 예약금 계좌. 개인 PII인지 사업자 정보인지 경계 -> 부모 없이 ASSET"
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-09-T1",
+          "task_type": "T1",
+          "question": "제안된 장소 중 1인당 비용이 가장 낮은 곳은 어디입니까?",
+          "gold": [
+            "사내 라운지",
+            "라운지"
+          ],
+          "slots": [
+            "라운지"
+          ],
+          "_note": "1인 비용 비교만 필요 -> PERSON 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-09-T2",
+          "task_type": "T2",
+          "question": "명우진이 제안한 송년회 장소와 1인당 비용은 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "여의도 뷔페 1인 4만 원",
+            "여의도 뷔페 4만 원",
+            "여의도 뷔페 1인당 4만 원"
+          ],
+          "slots": [
+            "여의도\\s*뷔페",
+            "(?<!\\d)4\\s*만\\s*원"
+          ],
+          "_note": "지목 인물 E3(물리 4번째=마지막, 표시[3], 시각 3번째)만 essential. 표시 [4,2,1,3], 시각 [2,4,1,3]",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "essential",
+            "E4": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "essential",
+            "E4c": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential",
+            "E7": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-09-T3",
+          "task_type": "T3",
+          "question": "네 사람의 제안을 각각 정리하고, 12월 19일 이전 날짜 중 참석 가능 인원이 가장 많은 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "마승현|승현",
+            "경소윤|소윤",
+            "명우진|우진",
+            "선아라|아라",
+            "여의도",
+            "12\\s*[월/]\\s*16",
+            "(?<!\\d)40\\s*명",
+            "12\\s*[월/]\\s*22"
+          ],
+          "_note": "참가자 이름 필요. 추천=명우진(40명). 전체 최다(45명)는 12/22라 함정. 식당 계좌 E7 not_essential",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E4": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4c": "essential",
+            "E5": "essential",
+            "E6": "essential",
+            "E7": "not_essential"
+          }
+        }
+      ]
+    },
+    {
+      "thread_id": "th-10",
+      "template": "제목: [회신] 디자이너 경력직 2차 면접 일정\n\n────────────────────────────\n[2] 2026-11-09 (월) 10:40\n보낸사람: {{E2|나건희}} <{{E2c|geonhee.na@yeoul-lab.example}}>\n받는사람: {{E1|하도경}}, {{E3|옥지후}}\n\n{{E1|도경}}님, {{E3|지후}}님. {{E2|나건희}}입니다.\n{{E4|염가빈}} 지원자 2차 면접은 11월 26일 목요일 오후 2시, 4층 소회의실이 어떨까요?\n면접관은 2명 참석 가능하고, 필요하면 화상으로 병행하겠습니다.\n\n────────────────────────────\n[1] 2026-11-09 (월) 09:00\n보낸사람: {{E1|하도경}} <{{E1c|dokyung.ha@yeoul-lab.example}}>\n받는사람: {{E2|나건희}}, {{E3|옥지후}}\n\n{{E1|하도경}}입니다. {{E4|가빈}} 님은 {{E5|경력 7년}}이라 실무진이 꼭 봐야 합니다.\n11월 25일 수요일 오전 10시, 1층 라운지 회의실로 잡으면 면접관 3명이 참석할 수 있습니다.\n지원자 연락처는 {{E6|010-2745-8390}}입니다.\n\n────────────────────────────\n[3] 2026-11-09 (월) 14:25\n보낸사람: {{E3|옥지후}} <{{E3c|jihu.ok@yeoul-lab.example}}>\n받는사람: {{E1|하도경}}, {{E2|나건희}}\n\n{{E3|옥지후}}입니다. 대표님까지 들어오시려면 11월 27일 금요일 오후 4시 30분이 유일합니다.\n온라인 화상 면접으로 하면 면접관 4명이 모두 참석 가능합니다.\n{{E2|건희}}님 안과는 날짜와 방식이 다릅니다.\n",
+      "entities": {
+        "E1": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "하도경": "심재윤",
+            "도경": "재윤"
+          }
+        },
+        "E2": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "나건희": "편하율",
+            "건희": "하율"
+          }
+        },
+        "E3": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "옥지후": "황규민",
+            "지후": "규민"
+          }
+        },
+        "E1c": {
+          "type": "CONTACT",
+          "parent": "E1",
+          "pseudo": {
+            "dokyung.ha@yeoul-lab.example": "jaeyun.shim@yeoul-lab.example"
+          }
+        },
+        "E2c": {
+          "type": "CONTACT",
+          "parent": "E2",
+          "pseudo": {
+            "geonhee.na@yeoul-lab.example": "hayul.pyeon@yeoul-lab.example"
+          }
+        },
+        "E3c": {
+          "type": "CONTACT",
+          "parent": "E3",
+          "pseudo": {
+            "jihu.ok@yeoul-lab.example": "gyumin.hwang@yeoul-lab.example"
+          }
+        },
+        "E4": {
+          "type": "PERSON",
+          "parent": null,
+          "pseudo": {
+            "염가빈": "차수빈",
+            "가빈": "수빈"
+          },
+          "note": "스레드 참가자가 아닌 제3자(지원자)"
+        },
+        "E5": {
+          "type": "ATTRIBUTE",
+          "parent": "E4",
+          "pseudo": {
+            "경력 7년": "경력 4년"
+          },
+          "note": "경력 연수는 단독으로 식별력이 약함. 준식별자로 보고 태깅"
+        },
+        "E6": {
+          "type": "CONTACT",
+          "parent": "E4",
+          "pseudo": {
+            "010-2745-8390": "010-6630-1958"
+          }
+        }
+      },
+      "questions": [
+        {
+          "question_id": "th-10-T1",
+          "task_type": "T1",
+          "question": "제안된 면접 시작 시각 중 가장 늦은 시각은 언제입니까?",
+          "gold": [
+            "오후 4시 30분",
+            "16시 30분",
+            "16:30"
+          ],
+          "slots": [
+            "오후\\s*4\\s*시\\s*30|16\\s*[시:]\\s*30"
+          ],
+          "_note": "시각 비교만 필요 -> PERSON(참가자·지원자) 무관",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "not_essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "not_essential",
+            "E3c": "not_essential",
+            "E4": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-10-T2",
+          "task_type": "T2",
+          "question": "나건희가 제안한 면접 일시와 장소는 무엇입니까? 한 줄로만 답하세요.",
+          "gold": [
+            "11월 26일 목요일 오후 2시 4층 소회의실",
+            "11월 26일 오후 2시 4층 소회의실",
+            "11/26 14시 4층 소회의실"
+          ],
+          "slots": [
+            "11\\s*[월/]\\s*26",
+            "오후\\s*2\\s*시|14\\s*시",
+            "4층\\s*소회의실"
+          ],
+          "_note": "지목 인물 E2(물리 1번째, 표시[2], 시각 2번째)만 essential. 앞 두 통만 교차(시각 [2,1,3])",
+          "relevance": {
+            "E1": "not_essential",
+            "E2": "essential",
+            "E3": "not_essential",
+            "E1c": "not_essential",
+            "E2c": "essential",
+            "E3c": "not_essential",
+            "E4": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        },
+        {
+          "question_id": "th-10-T3",
+          "task_type": "T3",
+          "question": "세 사람의 제안을 각각 정리하고, 면접관이 가장 많이 참석할 수 있는 안을 추천하는 회신을 작성하세요.",
+          "gold": [],
+          "slots": [
+            "하도경|도경",
+            "나건희|건희",
+            "옥지후|지후",
+            "11\\s*[월/]\\s*25",
+            "11\\s*[월/]\\s*26",
+            "11\\s*[월/]\\s*27",
+            "(?<!\\d)4\\s*명",
+            "오후\\s*4\\s*시\\s*30|16\\s*[시:]\\s*30"
+          ],
+          "_note": "참가자 3명만 essential. 지원자 E4(와 경력·연락처)는 회신에 등장할 수 있으나 추천에 필요 없음 -> not_essential (경계 사례)",
+          "relevance": {
+            "E1": "essential",
+            "E2": "essential",
+            "E3": "essential",
+            "E1c": "essential",
+            "E2c": "essential",
+            "E3c": "essential",
+            "E4": "not_essential",
+            "E5": "not_essential",
+            "E6": "not_essential"
+          }
+        }
+      ]
+    }
+  ]
+}
