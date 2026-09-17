@@ -1,11 +1,13 @@
 # 검증 스크립트: threads.json / items.jsonl / prompts.jsonl 정합성 + T2 육안 검증용 출력
 import json, re, sys
 from collections import defaultdict, Counter
-sys.path.insert(0, "."); import pilot
-data = json.load(open("threads.json", encoding="utf-8"))
-items = [json.loads(l) for l in open("items.jsonl", encoding="utf-8")]
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent)); import pilot
+from pilot import DATA, RUNS
+data = json.load(open(DATA / "threads.json", encoding="utf-8"))
+items = [json.loads(l) for l in open(RUNS / "items.jsonl", encoding="utf-8")]
 prom = defaultdict(dict)
-for l in open("prompts.jsonl", encoding="utf-8"):
+for l in open(RUNS / "prompts.jsonl", encoding="utf-8"):
     r = json.loads(l); prom[r["item_id"]][r["arm"]] = r
 TYPES = {"PERSON","CONTACT","ID_NUM","ORG","LOCATION","TIME","ATTRIBUTE","ASSET","OTHER"}
 errs, warns = [], []
@@ -143,7 +145,7 @@ print("\n== 경고 ==");  [print("  " + w) for w in warns]
 print("\n== 오류 ==");  [print("  " + e) for e in errs]
 print("\n결과:", "PASS" if not errs else f"FAIL ({len(errs)})")
 # 육안 검증용 T2 프롬프트 덤프
-with open("t2_visual_check.txt", "w", encoding="utf-8") as fo:
+with open(RUNS / "t2_visual_check.txt", "w", encoding="utf-8") as fo:
     for it in items:
         if it["task_type"] != "T2": continue
         for arm in ("A1a", "A1b", "A2a"):

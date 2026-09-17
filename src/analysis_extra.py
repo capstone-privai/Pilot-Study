@@ -15,9 +15,10 @@ pilot.py analyze가 다루지 않는 부분을 계산한다.
 
 사용법
 ------
-  python analysis_extra.py --scored scored.jsonl
-  python analysis_extra.py --scored scored.jsonl \
-      --human rater_a.json rater_b.json rater_c.json --out report.json
+  python src/analysis_extra.py                       # runs/scored.jsonl
+  python src/analysis_extra.py \
+      --human rating/rater_a.json rating/rater_b.json rating/rater_c.json \
+      --out runs/report.json
 
   --human 에는 compare.html이 내보낸 JSON 파일을 평가자 수만큼 넣는다.
   외부 패키지 없이 순수 파이썬으로 동작한다. 주 지표 정의는 pilot.py의 _primary를 그대로 쓴다.
@@ -33,6 +34,7 @@ import random
 from collections import Counter, defaultdict
 
 import pilot  # 같은 폴더의 pilot.py (ARMS, SCOPES, REPRS, _primary, _mean)
+from pilot import RUNS
 
 B = 5000            # 부트스트랩 반복 수 (사전등록 4절)
 SEED = 7            # pilot._paired_boot와 같은 시드 -> 같은 CI
@@ -421,7 +423,7 @@ def print_human(r: dict) -> None:
 
 def main():
     ap = argparse.ArgumentParser(description="사전등록 v0.3 판정 규칙에 따른 추가 분석")
-    ap.add_argument("--scored", default="scored.jsonl")
+    ap.add_argument("--scored", default=str(RUNS / "scored.jsonl"))
     ap.add_argument("--human", nargs="*", default=[], help="compare.html 내보내기 JSON (평가자별 1개)")
     ap.add_argument("--out", default="", help="전체 결과를 JSON으로 저장할 경로")
     a = ap.parse_args()

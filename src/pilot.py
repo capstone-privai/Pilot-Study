@@ -23,15 +23,18 @@ N = 스레드 10 × 질문 3 = 30,  총 생성 = 240
 
 단계
 ----
-  build    threads.json -> items.jsonl        (마커 파싱, 오프셋 자동 기록)
-  prompts  items.jsonl  -> prompts.jsonl      (8 arm 전개)
-  gen      prompts.jsonl -> raw.jsonl         (Groq 호출, 캐시, 429 백오프)
-  restore  raw.jsonl    -> restored.jsonl     (복원. 유출은 raw에서 측정)
-  score    restored.jsonl -> scored.jsonl
+  build    data/threads.json -> runs/items.jsonl     (마커 파싱, 오프셋 자동 기록)
+  prompts  runs/items.jsonl  -> runs/prompts.jsonl   (8 arm 전개)
+  gen      runs/prompts.jsonl -> runs/raw.jsonl      (Groq 호출, 캐시, 429 백오프)
+  restore  runs/raw.jsonl    -> runs/restored.jsonl  (복원. 유출은 raw에서 측정)
+  score    runs/restored.jsonl -> runs/scored.jsonl
            주 지표: T1 containment / T2 slot_all / T3 slot recall
-  analyze  scored.jsonl -> 리포트
+  analyze  runs/scored.jsonl -> 리포트
 
   demo     전 단계를 echo 백엔드로 한 번에 (배선 확인용)
+
+경로 기본값은 저장소 루트 기준(data/, runs/)이며 어느 디렉터리에서 실행해도 된다.
+API 키는 루트의 .env(GROQ_API_KEY=...) 또는 환경변수에서 읽는다.
 """
 
 from __future__ import annotations
@@ -45,7 +48,30 @@ import re
 import statistics
 import time
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Callable
+
+# 저장소 기준 경로. 어느 디렉터리에서 실행해도 같은 파일을 가리킨다.
+ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "data"
+RUNS = ROOT / "runs"
+RUNS.mkdir(exist_ok=True)
+
+
+def _load_env() -> None:
+    """ROOT/.env 의 KEY=VALUE 를 환경변수로 등록. 이미 있는 값은 덮지 않는다."""
+    f = ROOT / ".env"
+    if not f.exists():
+        return
+    for line in f.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
+
+
+_load_env()
 
 MARKER = re.compile(r"\{\{([A-Za-z0-9_]+)\|(.+?)\}\}")
 
@@ -245,24 +271,31 @@ class Cache:
             f.write(json.dumps({"k": k, "v": v}, ensure_ascii=False) + "\n")
 
 
-def backend_echo(prompt: str, model: str) -> str:
+# backend는 (응답 텍스트, 이번 호출이 쓴 총 토큰 수)를 돌려준다. 토큰 수는 TPM 페이싱용.
+Backend = Callable[[str, str], tuple[str, int]]
+
+
+def backend_echo(prompt: str, model: str) -> tuple[str, int]:
     """배선 확인 전용 더미. 추론 없이 정규식으로 긁어옴 -> 실험 결과 아님."""
     body = prompt.split("[스레드]", 1)[-1].split("[질문]", 1)[0]
     places = re.findall(r"(\d층\s*\S*회의실|본관\s*세미나실)", body)
-    return ", ".join(dict.fromkeys(places)) or "정보 없음"
+    return ", ".join(dict.fromkeys(places)) or "정보 없음", 0
 
 
-def backend_groq(api_key: str, base_url: str) -> Callable[[str, str], str]:
+def backend_groq(api_key: str, base_url: str) -> Backend:
     from openai import OpenAI                      # pip install openai
     cli = OpenAI(api_key=api_key, base_url=base_url)
 
-    def call(prompt: str, model: str) -> str:
+    def call(prompt: str, model: str) -> tuple[str, int]:
         for attempt in range(6):
             try:
+                # max_tokens는 실제 사용분만 TPM에 잡히므로(예약 아님) 넉넉히 둔다.
+                # T3 회신이 low에서도 ~800까지 나와 800이면 절반 이상 잘렸다.
                 r = cli.chat.completions.create(
                     model=model, messages=[{"role": "user", "content": prompt}],
-                    max_tokens=800)
-                return r.choices[0].message.content or ""
+                    max_tokens=2000, reasoning_effort="low")
+                return (r.choices[0].message.content or "",
+                        r.usage.total_tokens if r.usage else 0)
             except Exception as e:
                 wait = min(60, 2 ** attempt * 5)
                 print(f"  429/err, {wait}s 대기 ({e.__class__.__name__})")
@@ -271,10 +304,14 @@ def backend_groq(api_key: str, base_url: str) -> Callable[[str, str], str]:
     return call
 
 
-def gen(in_path: str, out_path: str, call, model: str,
-        sleep: float = 7.0, cache_path: str = "cache.jsonl") -> None:
-    """sleep 기본 7초 = Groq 무료 TPM(8,000) 기준 분당 8~9회. 240회에 약 30분."""
-    cache = Cache(cache_path)
+def gen(in_path: str, out_path: str, call: Backend, model: str,
+        sleep: float = 5.0, cache_path: str | os.PathLike = RUNS / "cache.jsonl",
+        tpm: int = 8000) -> None:
+    """호출마다 max(sleep, 이번 호출 토큰 / tpm * 60초) 만큼 쉰다.
+    Groq 무료 TPM 8,000 기준 T1/T2(~650토큰)는 5초, T3(~1,400토큰)는 ~10초.
+    240회에 약 30분. 일일 한도(TPD 200K)에 걸리면 다음날 같은 명령을 다시 실행하면
+    캐시된 건은 건너뛰고 이어서 생성한다."""
+    cache = Cache(str(cache_path))
     rows = [json.loads(l) for l in open(in_path, encoding="utf-8")]
     with open(out_path, "w", encoding="utf-8") as fo:
         for i, r in enumerate(rows, 1):
@@ -282,9 +319,9 @@ def gen(in_path: str, out_path: str, call, model: str,
                                .encode()).hexdigest()[:24]
             v = cache.get(k)
             if v is None:
-                v = call(r["prompt"], model)
+                v, used = call(r["prompt"], model)
                 cache.put(k, v)
-                time.sleep(sleep)
+                time.sleep(max(sleep, used / tpm * 60) if sleep > 0 else 0)
             r["raw"] = v
             fo.write(json.dumps(r, ensure_ascii=False) + "\n")
             if i % 20 == 0:
@@ -482,19 +519,21 @@ def main():
     ap = argparse.ArgumentParser()
     s = ap.add_subparsers(dest="cmd", required=True)
 
-    p = s.add_parser("build");   p.add_argument("--threads", default="threads.json"); p.add_argument("--out", default="items.jsonl")
-    p = s.add_parser("prompts"); p.add_argument("--in", dest="i", default="items.jsonl"); p.add_argument("--out", default="prompts.jsonl")
+    D, R = str(DATA), str(RUNS)
+    p = s.add_parser("build");   p.add_argument("--threads", default=f"{D}/threads.json"); p.add_argument("--out", default=f"{R}/items.jsonl")
+    p = s.add_parser("prompts"); p.add_argument("--in", dest="i", default=f"{R}/items.jsonl"); p.add_argument("--out", default=f"{R}/prompts.jsonl")
     p = s.add_parser("gen")
-    p.add_argument("--in", dest="i", default="prompts.jsonl"); p.add_argument("--out", default="raw.jsonl")
+    p.add_argument("--in", dest="i", default=f"{R}/prompts.jsonl"); p.add_argument("--out", default=f"{R}/raw.jsonl")
     p.add_argument("--backend", choices=["echo", "groq"], default="echo")
     p.add_argument("--model", default="openai/gpt-oss-120b")
     p.add_argument("--base-url", default="https://api.groq.com/openai/v1")
     p.add_argument("--api-key", default=os.environ.get("GROQ_API_KEY", ""))
-    p.add_argument("--sleep", type=float, default=7.0)
-    p = s.add_parser("restore");  p.add_argument("--in", dest="i", default="raw.jsonl"); p.add_argument("--out", default="restored.jsonl")
+    p.add_argument("--sleep", type=float, default=5.0, help="호출 간 최소 대기(초). 토큰 사용량에 따라 자동으로 늘어남")
+    p.add_argument("--cache", default=f"{R}/cache.jsonl")
+    p = s.add_parser("restore");  p.add_argument("--in", dest="i", default=f"{R}/raw.jsonl"); p.add_argument("--out", default=f"{R}/restored.jsonl")
     p = s.add_parser("score")
-    p.add_argument("--in", dest="i", default="restored.jsonl"); p.add_argument("--items", default="items.jsonl"); p.add_argument("--out", default="scored.jsonl")
-    p = s.add_parser("analyze"); p.add_argument("--in", dest="i", default="scored.jsonl")
+    p.add_argument("--in", dest="i", default=f"{R}/restored.jsonl"); p.add_argument("--items", default=f"{R}/items.jsonl"); p.add_argument("--out", default=f"{R}/scored.jsonl")
+    p = s.add_parser("analyze"); p.add_argument("--in", dest="i", default=f"{R}/scored.jsonl")
     s.add_parser("demo")
 
     a = ap.parse_args()
@@ -504,7 +543,7 @@ def main():
         prompts(a.i, a.out)
     elif a.cmd == "gen":
         call = backend_echo if a.backend == "echo" else backend_groq(a.api_key, a.base_url)
-        gen(a.i, a.out, call, a.model, 0.0 if a.backend == "echo" else a.sleep)
+        gen(a.i, a.out, call, a.model, 0.0 if a.backend == "echo" else a.sleep, a.cache)
     elif a.cmd == "restore":
         restore_stage(a.i, a.out)
     elif a.cmd == "score":
@@ -512,12 +551,13 @@ def main():
     elif a.cmd == "analyze":
         analyze(a.i)
     elif a.cmd == "demo":
-        build("threads.json", "items.jsonl")
-        prompts("items.jsonl", "prompts.jsonl")
-        gen("prompts.jsonl", "raw.jsonl", backend_echo, "echo", 0.0, "demo_cache.jsonl")
-        restore_stage("raw.jsonl", "restored.jsonl")
-        score("restored.jsonl", "items.jsonl", "scored.jsonl")
-        analyze("scored.jsonl")
+        build(f"{D}/threads.json", f"{R}/items.jsonl")
+        prompts(f"{R}/items.jsonl", f"{R}/prompts.jsonl")
+        # 실제 실행 산출물(raw/restored/scored)을 덮어쓰지 않도록 demo_ 접두사를 쓴다
+        gen(f"{R}/prompts.jsonl", f"{R}/demo_raw.jsonl", backend_echo, "echo", 0.0, f"{R}/demo_cache.jsonl")
+        restore_stage(f"{R}/demo_raw.jsonl", f"{R}/demo_restored.jsonl")
+        score(f"{R}/demo_restored.jsonl", f"{R}/items.jsonl", f"{R}/demo_scored.jsonl")
+        analyze(f"{R}/demo_scored.jsonl")
 
 
 if __name__ == "__main__":
